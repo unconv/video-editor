@@ -1529,7 +1529,11 @@ class Timeline:
         rl.draw_text(stamp, x + width - stamp_width - 20, y - 35, stamp_size, rl.WHITE)
 
         # Playhead line
-        rl.draw_line(int((self.playhead - self.scroll_x) * self.zoom), y, int((self.playhead - self.scroll_x) * self.zoom), y + height, rl.WHITE)
+        playhead_x = int((self.playhead - self.scroll_x) * self.zoom)
+        rl.draw_line(playhead_x, y, playhead_x, y + height, rl.WHITE)
+
+        if playhead_x > x + width:
+            self.scroll_to_playhead()
 
         if ctrl_down:
             if shift_down:
