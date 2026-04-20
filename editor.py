@@ -1863,6 +1863,8 @@ def audio_player(project: Project):
                     frame = project.timeline.audio_buffer[chunk_number]
                     if frame is not None:
                         chunk.extend(frame)
+                    else:
+                        break
                 else:
                     break
                 if project.timeline.play_current_audio_frame:
