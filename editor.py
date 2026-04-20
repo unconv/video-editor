@@ -1532,7 +1532,7 @@ class Timeline:
         playhead_x = int((self.playhead - self.scroll_x) * self.zoom)
         rl.draw_line(playhead_x, y, playhead_x, y + height, rl.WHITE)
 
-        if playhead_x > x + width:
+        if self.is_playing and playhead_x > x + width:
             self.scroll_to_playhead()
 
         if ctrl_down:
