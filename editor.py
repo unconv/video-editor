@@ -2018,11 +2018,16 @@ def main():
                     if file:
                         project.save(file)
             elif rl.is_key_pressed(rl.KeyboardKey.KEY_O):
-                file = open_file(title="Open a Project File")
+                file = open_file(title="Open a Project or Add Clip")
                 if file:
-                    project.load(file)
-                    # TODO: redoing load project screws up timeline
-                    #project.save_history("Load new project")
+                    if file.endswith(".json"):
+                        project.load(file)
+                        # TODO: redoing load project screws up timeline
+                        #project.save_history("Load new project")
+                    else:
+                        # TODO: detect file type
+                        clip = Clip(project, file, "video")
+                        project.clip_bin.add_clip(clip)
             elif rl.is_key_pressed(rl.KeyboardKey.KEY_R):
                 file = open_file_to_save(title="Render Project...")
                 if file:
