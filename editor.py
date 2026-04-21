@@ -2092,11 +2092,13 @@ def main():
         video_constrain_width = int(screen_width * 0.7)
         video_constrain_height = int(screen_height - timeline_height - 45)
 
-        ch = video_constrain_height
-        cw = int(ch * video_aspect_ratio)
-
         if not render_clip_bin:
             video_constrain_width = int(screen_width)
+            if not render_timeline:
+                video_constrain_height = int(screen_height)
+
+        ch = video_constrain_height
+        cw = int(ch * video_aspect_ratio)
 
         if video_constrain_width < cw:
             ratio = ch / cw
