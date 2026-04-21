@@ -283,7 +283,7 @@ class ClipBinItem:
         self.x = x
         self.y = y
 
-    def render(self, width: int, left_mouse_down: bool, mouse_pos: rl.Vector2):
+    def render(self, width: int, left_mouse_down: bool, mouse_pos: rl.Vector2, hover_clip_bin: bool):
         padding = 10
         font_size = 25
         bg_color = rl.Color(69, 69, 69, 255)
@@ -292,7 +292,7 @@ class ClipBinItem:
 
         rec = rl.Rectangle(self.x, self.y, width, self.height)
 
-        if position_collides_with_rec(mouse_pos, rec):
+        if hover_clip_bin and position_collides_with_rec(mouse_pos, rec):
             bg_color = rl.Color(90, 90, 90, 255)
 
             if left_mouse_down and not self.dragging and not project.dragging:
@@ -393,7 +393,10 @@ class ClipBin:
         pos_y = int(self.y + self.scroll)
         margin = 5
 
-        rl.draw_rectangle_lines(self.x, self.y, width+1, height+1, rl.WHITE)
+        rec = rl.Rectangle(self.x, self.y, width+1, height+1)
+        hover_clip_bin = position_collides_with_rec(mouse_pos, rec)
+
+        rl.draw_rectangle_lines_ex(rec, 1, rl.WHITE)
 
         render_order: list[ClipBinItem] = []
 
@@ -408,7 +411,7 @@ class ClipBin:
 
         for item in render_order:
             rl.begin_scissor_mode(self.x, self.y, width, height)
-            item.render(width, left_mouse_down, mouse_pos)
+            item.render(width, left_mouse_down, mouse_pos, hover_clip_bin)
             rl.end_scissor_mode()
 
         max_scroll = min(0, height - (pos_y - self.scroll - self.y))
