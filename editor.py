@@ -2055,15 +2055,22 @@ def main():
         ch = video_canvas_height
 
         video_constrain_width = int(screen_width / 7 * 4)
+        video_constrain_height = int(screen_height * (2/3)) - 50
 
         if video_constrain_width < cw:
             ratio = ch / cw
             cw = video_constrain_width
             ch = int(cw * ratio)
 
+        if video_constrain_height < ch:
+            ratio = cw / ch
+            ch = video_constrain_height
+            cw = int(ch * ratio)
+
         if cw != video_canvas.width or ch != video_canvas.height:
             rl.unload_texture(video_canvas)
             video_canvas = create_blank_texture(cw, ch)
+            loaded_frame = None
 
         rl.begin_drawing()
 
@@ -2088,7 +2095,7 @@ def main():
                         loaded_frame = int(current_frame_number)
 
             if render_video:
-                rl.draw_texture(video_canvas, int(screen_width / 7 * 3), 0, rl.WHITE)
+                rl.draw_texture(video_canvas, int(screen_width - cw), 0, rl.WHITE)
 
         if project.timeline.is_playing:
             project.timeline.playhead += delta_time
