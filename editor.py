@@ -1901,13 +1901,8 @@ def main():
 
     rl.set_target_fps(60)
 
-    video_canvas_width = 1920
-    video_canvas_height = 1080
-
-    video_canvas = create_blank_texture(
-        video_canvas_width,
-        video_canvas_height,
-    )
+    video_aspect_ratio = 1920 / 1080
+    video_canvas = create_blank_texture(1920, 1080)
 
     current_frame_number = 0
     current_audio_frame_number = 0
@@ -1926,6 +1921,8 @@ def main():
     render_video = True
 
     loaded_frame = None
+
+    timeline_height = 300
 
     while not rl.window_should_close():
         screen_width = rl.get_screen_width()
@@ -2051,11 +2048,14 @@ def main():
             else:
                 project.timeline.want_to_play = True
 
-        cw = video_canvas_width
-        ch = video_canvas_height
+        video_constrain_width = int(screen_width * 0.7)
+        video_constrain_height = int(screen_height - timeline_height - 45)
 
-        video_constrain_width = int(screen_width / 7 * 4)
-        video_constrain_height = int(screen_height * (2/3)) - 50
+        ch = video_constrain_height
+        cw = int(ch * video_aspect_ratio)
+
+        if not render_clip_bin:
+            video_constrain_width = int(screen_width)
 
         if video_constrain_width < cw:
             ratio = ch / cw
@@ -2077,10 +2077,10 @@ def main():
         rl.clear_background((10, 10, 20))
 
         if render_timeline:
-            project.timeline.render(0, int(screen_height * (2/3)), screen_width, int(screen_height * (1/3)), mouse_wheel_move, delta_time, ctrl_down, shift_down, left_mouse_pressed, mouse_pos, left_mouse_released, left_mouse_down)
+            project.timeline.render(0, int(screen_height - timeline_height), screen_width, timeline_height, mouse_wheel_move, delta_time, ctrl_down, shift_down, left_mouse_pressed, mouse_pos, left_mouse_released, left_mouse_down)
 
         if render_clip_bin:
-            project.clip_bin.render(int(screen_width / 7 * 3)-1, int(screen_height * (2/3)), left_mouse_down, mouse_pos, mouse_wheel_move, delta_time)
+            project.clip_bin.render(int(screen_width - cw)-1, int(screen_height - timeline_height - 45), left_mouse_down, mouse_pos, mouse_wheel_move, delta_time)
 
         if video:
             if int(current_frame_number) in project.timeline.video_buffer:
@@ -2095,7 +2095,11 @@ def main():
                         loaded_frame = int(current_frame_number)
 
             if render_video:
-                rl.draw_texture(video_canvas, int(screen_width - cw), 0, rl.WHITE)
+                if render_clip_bin:
+                    video_x = int(screen_width - cw)
+                else:
+                    video_x = int(int(screen_width - cw) / 2)
+                rl.draw_texture(video_canvas, video_x, 0, rl.WHITE)
 
         if project.timeline.is_playing:
             project.timeline.playhead += delta_time
