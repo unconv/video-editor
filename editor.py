@@ -1949,7 +1949,7 @@ def main():
 
                 if dropped_file.endswith(".json"):
                     # TODO: add area on screen where append=True
-                    project.load(dropped_file, append=True)
+                    project.load(dropped_file, append=False)
                 else:
                     # TODO: detect file type
                     clip = Clip(project, dropped_file, "video")
