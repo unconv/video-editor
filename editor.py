@@ -1305,6 +1305,7 @@ class Timeline:
         self.video_buffer: dict[int, VideoFrame] = {}
         self.audio_buffer: dict[int, bytearray] = {}
         self.end_time: float = 0.0
+        self.drag_scrolling: rl.Vector2 | None = None
 
         self.audio_bufsize = int(self.audio_framesize*4)
 
@@ -1501,13 +1502,16 @@ class Timeline:
             scroll_amount = mouse_wheel_move * delta_time
             if scroll_amount != 0:
                 if ctrl_down:
-                    min_zoom = 0.01
+                    min_zoom = 5.0
                     max_zoom = 2000
                     self.zoom *= 1.2 if scroll_amount > 0 else 0.8
                     if self.zoom < min_zoom:
                         self.zoom = min_zoom
                     elif self.zoom > max_zoom:
                         self.zoom = max_zoom
+
+                    if project:
+                        project.show_message(f"Zoom level: {self.zoom:03f}")
 
                     self.scroll_x = mouse_time - (mouse_pos.x - x) * (1 / self.zoom)
                     if self.scroll_x < 0:
@@ -1537,6 +1541,43 @@ class Timeline:
 
         if self.is_playing and playhead_x > x + width:
             self.scroll_to_playhead()
+
+        # Scrollbar
+        thumb_min_width = 50
+        thumb_height = 20
+        visible_width = width
+        total_width = (self.end_time + 10 * 60) * self.zoom
+        total_width = max(total_width, self.scroll_x * self.zoom + width)
+
+        if total_width > visible_width:
+            thumb_width = visible_width / total_width * visible_width
+            thumb_width = max(thumb_min_width, thumb_width)
+
+            thumb_x = x + (self.scroll_x * self.zoom) / total_width * visible_width
+            thumb_rec = rl.Rectangle(int(thumb_x), y + height - thumb_height, int(thumb_width), thumb_height)
+            if position_collides_with_rec(mouse_pos, thumb_rec):
+                thumb_color = rl.Color(200, 200, 200, 255)
+
+                if (not project or not project.dragging) and not self.drag_scrolling and left_mouse_pressed:
+                    if project:
+                        project.dragging = True
+                    self.drag_scrolling = mouse_pos
+            else:
+                thumb_color = rl.Color(200, 200, 200, 150)
+            rl.draw_rectangle_rec(thumb_rec, thumb_color)
+
+        if self.drag_scrolling:
+            scroll_amount = mouse_pos.x - self.drag_scrolling.x
+            if thumb_rec.x + scroll_amount < x + width - thumb_rec.width:
+                self.scroll_x += (scroll_amount / visible_width * total_width) / self.zoom
+                if self.scroll_x < 0:
+                    self.scroll_x = 0
+                self.drag_scrolling = mouse_pos
+
+            if rl.is_mouse_button_released(rl.MouseButton.MOUSE_BUTTON_LEFT):
+                self.drag_scrolling = None
+                if project:
+                    project.dragging = False
 
         if ctrl_down:
             if shift_down:
