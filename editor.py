@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from av.audio.resampler import AudioResampler
 from av.video.frame import VideoFrame
 from typing import Literal, Iterator
